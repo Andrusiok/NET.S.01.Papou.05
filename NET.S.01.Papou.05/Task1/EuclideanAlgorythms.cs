@@ -90,9 +90,34 @@ namespace Task1
             if (number < 0) sign += "0";
             else sign += "1";
 
+            double exponentNumber = number;
+            int power = 0;
+
+            while (exponentNumber<2 && exponentNumber>1)
+            {
+                exponentNumber /= Math.Pow(2, power);
+                if (exponentNumber>1) power++;
+                else power--;
+            }
+
+            exponent = FormExponent(power);
+
+            double fractionNumber = exponentNumber - 1;
+
+            for (int i=1; i<24||fractionNumber>0; i++)
+            {
+                double temp;
+                if ((temp = fractionNumber - Math.Pow(2, -i)) > 0)
+                {
+                    fraction += "1";
+                    fractionNumber = temp;
+                }
+                else fraction += "0";
+            }
 
             return sign+exponent+fraction;
         }
+
         #endregion
         #region private methods
 
@@ -172,6 +197,20 @@ namespace Task1
                 tempGCD = BinaryGCD(tempGCD, numbers[i]);
 
             return tempGCD;
+        }
+
+        private static string FormExponent(int power)
+        {
+            int exponentNumber = 127 + power;
+            string result = "";
+
+            while (exponentNumber != 0)
+            {
+                result += (exponentNumber % 2).ToString();
+                exponentNumber /= 2;
+            }
+
+            return new string(result.Reverse().ToArray());
         }
         #endregion
     }
