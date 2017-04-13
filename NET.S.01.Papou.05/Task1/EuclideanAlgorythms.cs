@@ -7,6 +7,9 @@ using System.Diagnostics;
 
 namespace Task1
 {
+    public delegate int GCDAlgorythm(int a, int b);
+    public delegate int GCDAlgorythmNumbers(params int[] numbers);
+
     public static class EuclidianAlgorithms
     {
         #region public methods
@@ -21,7 +24,26 @@ namespace Task1
         {
             Stopwatch timer = new Stopwatch();
             timer.Start();
-            int result = BinaryGCD(a, b);
+            int result = GCD(a, b, AlgorythmGCD);
+            timer.Stop();
+            elapsedTime = timer.ElapsedMilliseconds / 1000;
+            return result;
+        }
+
+        /// <summary>
+        /// Computes GCD by standart Euclidean algorithm
+        /// </summary>
+        /// <param name="elapsedTime">>elapsed time of executed method</param>
+        /// <param name="a">first number</param>
+        /// <param name="b">second number</param>
+        /// <param name="c">third number</param>
+        /// <returns></returns>
+        public static int FindGCD(out long elapsedTime, int a, int b, int c)
+        {
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            int firstPair = GCD(a, b, AlgorythmGCD);
+            int result = GCD(firstPair, c, AlgorythmGCD);
             timer.Stop();
             elapsedTime = timer.ElapsedMilliseconds / 1000;
             return result;
@@ -37,7 +59,7 @@ namespace Task1
         {
             Stopwatch timer = new Stopwatch();
             timer.Start();
-            int result = BinaryGCD(numbers);
+            int result = GCD(numbers, AlgorythmBinaryGCD);
             timer.Stop();
             elapsedTime = timer.ElapsedMilliseconds / 1000;
             return result;
@@ -54,7 +76,26 @@ namespace Task1
         {
             Stopwatch timer = new Stopwatch();
             timer.Start();
-            int result = BinaryGCD(a, b);
+            int result = GCD(a, b, AlgorythmBinaryGCD);
+            timer.Stop();
+            elapsedTime = timer.ElapsedMilliseconds / 1000;
+            return result;
+        }
+
+        /// <summary>
+        /// Computes GCD by binary Euclidean algorithm
+        /// </summary>
+        /// <param name="elapsedTime">elapsed time of executed method</param>
+        /// <param name="a">first number</param>
+        /// <param name="b">second number</param>
+        /// <param name="c">third number</param>
+        /// <returns>GCD</returns>
+        public static int FindGCDBinary(out long elapsedTime, int a, int b, int c)
+        {
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            int firstPair = GCD(a, b, AlgorythmBinaryGCD);
+            int result = GCD(firstPair, c, AlgorythmBinaryGCD);
             timer.Stop();
             elapsedTime = timer.ElapsedMilliseconds / 1000;
             return result;
@@ -70,7 +111,7 @@ namespace Task1
         {
             Stopwatch timer = new Stopwatch();
             timer.Start();
-            int result = BinaryGCD(numbers);
+            int result = GCD(numbers, AlgorythmBinaryGCD);
             timer.Stop();
             elapsedTime = timer.ElapsedMilliseconds / 1000;
             return result;
@@ -83,9 +124,9 @@ namespace Task1
         /// <returns>string that represents IEEE754 standart</returns>
         public static string ToIEEE754(this double number)
         {
-            string sign = "";
-            string exponent = "";
-            string fraction = "";
+            string sign = string.Empty;
+            string exponent = string.Empty;
+            string fraction = string.Empty;
 
             if (number < 0) sign += "0";
             else sign += "1";
@@ -121,32 +162,18 @@ namespace Task1
         #endregion
         #region private methods
 
-        private static int GCD(int a, int b)
+        private static int GCD(int a, int b, GCDAlgorythm algorythm)
         {
             if (a == 0) return Math.Abs(b);
             if (b == 0) return Math.Abs(a);
-            return AlgorythmGCD(Math.Abs(a), Math.Abs(b));
+            return algorythm(Math.Abs(a), Math.Abs(b));
         }
 
-        private static int GCD(params int[] numbers)
+        private static int GCD(int[] numbers, GCDAlgorythmNumbers algorythm)
         {
             if (numbers.Length < 2) throw new ArgumentException();
             if (Array.TrueForAll(numbers, x => x == 0)) throw new ArgumentException();
-            return AlgorythmGCD(numbers);
-        }
-
-        private static int BinaryGCD(int a, int b)
-        {
-            if (a == 0) return Math.Abs(b);
-            if (b == 0) return Math.Abs(a);
-            return AlgorythmBinaryGCD(Math.Abs(a), Math.Abs(b));
-        }
-
-        private static int BinaryGCD(params int[] numbers)
-        {
-            if (numbers.Length < 2) throw new ArgumentException();
-            if (Array.TrueForAll(numbers, x => x == 0)) throw new ArgumentException();
-            return AlgorythmBinaryGCD(numbers);
+            return algorythm(numbers);
         }
 
         private static int AlgorythmGCD(int a, int b)
@@ -161,10 +188,10 @@ namespace Task1
         
         private static int AlgorythmGCD(params int[] numbers)
         {
-            int tempGCD = GCD(numbers[0], numbers[1]);
+            int tempGCD = GCD(numbers[0], numbers[1], AlgorythmGCD);
 
             for (int i = 2; i < numbers.Length; i++)
-                tempGCD = GCD(tempGCD, numbers[i]);
+                tempGCD = GCD(tempGCD, numbers[i], AlgorythmGCD);
 
             return tempGCD;
         }
@@ -191,10 +218,10 @@ namespace Task1
 
         private static int AlgorythmBinaryGCD(params int[] numbers)
         {
-            int tempGCD = BinaryGCD(numbers[0], numbers[1]);
+            int tempGCD = GCD(numbers[0], numbers[1], AlgorythmBinaryGCD);
 
             for (int i = 2; i < numbers.Length; i++)
-                tempGCD = BinaryGCD(tempGCD, numbers[i]);
+                tempGCD = GCD(tempGCD, numbers[i], AlgorythmBinaryGCD);
 
             return tempGCD;
         }
@@ -202,7 +229,7 @@ namespace Task1
         private static string FormExponent(int power)
         {
             int exponentNumber = 127 + power;
-            string result = "";
+            string result = string.Empty;
 
             while (exponentNumber != 0)
             {
